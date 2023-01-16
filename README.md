@@ -74,13 +74,13 @@ Nest is [MIT licensed](LICENSE).
 
 ## About Project
 
-Esse projeto foi construido com a finalidade de aprofundamento de tecnicas com NestJs com conexão a banco de dados e segurança. O projeto foi construido aos poucos aplicando boas praticas de escrita, testes e documentação.
+Esse projeto foi construido com a finalidade de aprofundamento de tecnicas com NestJs com conexão a banco de dados via containerização, utilizaremos também tecnicas do Docker Compose para criar nosso banco de dados padrão e documentação via Swagger. O projeto trata-se de um CRUD para cadastro de itens, consulta e atualização. Algo bem simples apenas exemplificar a construção e as tecnicas do NestJs.
 
-A versão Node utilizada foi a Node.js (>= 18.7.0)
+A versão Node utilizada foi a Node.js (>= 18.7.0).
 
 ## Inicialização do projeto
 
-O primeiro passo foi a inicialização de um novo projeto com a CLI do proprio NestJs, executando o comando
+O primeiro passo foi a inicialização de um novo projeto com a CLI do proprio NestJs, executando o comando:
 
 ```bash
 $ nest new nestjs-api
@@ -96,7 +96,7 @@ Ao executar um dos comandos acima teremos a lista de arquivos criados e o gerenc
 
 Após inicializar o projeto podemos ver no terminal os logs de inicialização.
 
-## Adicionando persistência.
+## Adicionando dependências
 
 Antes que comecemos de fato a modificação de codigo vamos instalar algumas dependencias como o [TypeORM](https://typeorm.io/) e o [PostgreSQL](https://www.postgresql.org/) para gerenciar o nosso banco de dados.
 
@@ -112,7 +112,7 @@ $ npm install --save @nestjs/config
 
 Internamente o NestJs utiliza o dotnev, por isso não precisaremos instalar manualmente a dependencia.
 
-Por se tratar de um sistema desenvolvido apenas para estudo, vamos manter o arquivo .env no repositorio, mas por praticas de segurança não esqueça de adicionar o .env em seu .gitignore para que não exponha seus acessos a pessoas má intencionadas.
+~_Por se tratar de um sistema desenvolvido apenas para estudo, vamos manter o arquivo .env no repositorio, mas por praticas de segurança não esqueça de adicionar o .env em seu .gitignore para não expor seus acessos a pessoas má intencionadas._~
 
 ```bash
 $ npm install --save class-validator class-transformer
@@ -120,11 +120,17 @@ $ npm install --save class-validator class-transformer
 
 A dependencia acima será utilizada para garantir que os valores recebidos por nossos DTOs (veremos a frente) estejam de acordo com o que esperamos. Podemos verificar a lista completa de validadores na [documentação](https://github.com/typestack/class-validator#validation-decorators)
 
+Vamos também realizar a documentação dessa api via [Swager](https://docs.nestjs.com/openapi/introduction). Com apenas a instalação temos em pleno funcionamento para uso.
+
+```bash
+$ npm install --save @nestjs/swagger swagger-ui-express
+```
+
 ## Banco de dados
 
-Como vimos acima vamos utilizar o banco de dados [PostgreSQL](https://www.postgresql.org/) + [Docker](https://www.docker.com/) Compose para esse projeto.
+Como vimos acima vamos utilizar o banco de dados [PostgreSQL](https://www.postgresql.org/) + [Docker Compose](https://www.docker.com/) para esse projeto.
 
-Como dito, vamos utilizar o docker compose, que é uma ferramenta de definição e runtime de aplicações multi-container.
+O docker compose, é uma ferramenta de definição e runtime de aplicações multi-container.
 
 Iniciaremos criando um container para o PostgreSQL, que vai rodar em um container próprio. Para isso, criamos um arquivo chamado **docker-compose.yaml** na pasta raiz do projeto.
 
@@ -329,11 +335,87 @@ export class ItemModule {}
 
 Por fim, com as novas alterações devemos modificar o arquivo **item.controller.ts** substituindo o `+id` apenas por `id`. Agora nossa api está finalmente implementada.
 
+## Documentando a Api.
+
+O Swagger é uma maneira simples e pratica para se documentar APIs de acordo com a OpenApi.
+
+Vamos atualizar nosso modulo **main.ts** para ficar assim:
+
+```ts
+import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(new ValidationPipe());
+
+  const config = new DocumentBuilder()
+    .setTitle('Lista de itens')
+    .setDescription('Minha lista de itens para compras')
+    .setVersion('1.0')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+
+  await app.listen(3000);
+}
+bootstrap();
+```
+
+Agora, precisamos apenas atualizar nossas entidades e os DTOs com os decoratos para sejam identificados pelo Swagger.
+
+Em nosso DTO **create-item.dto.ts** vamos adicionar as importações de atributos @ApiProperty(). Quando a variavel for opcional podemos usar o @ApiPropertyoptional(). O arquivo ficará assim:
+
+```ts
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
+
+export class CreateItemDto {
+  @ApiProperty({ example: 'Bananas' })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiPropertyOptional({
+    example: 'bananas',
+    description: 'Optional description of the item',
+  })
+  @IsOptional()
+  @IsString()
+  description: string;
+
+  @ApiProperty({ example: 5, description: 'Needed quantity' })
+  @IsInt()
+  @Min(0)
+  quantity: number;
+}
+```
+
+Já para o caso o **update-item.dto.ts** por utilizar as especificações de dentro de nosso **create-item.dto.ts** ja temos a injeção dos decorators dentro dele, apenas precisamos trocar a importação do **ParcialType** para que venha de dentro do modulo do swagger e esta tudo pronto. O arquivo ficará assim:
+
+```ts
+import { PartialType } from '@nestjs/swagger';
+import { CreateItemDto } from './create-item.dto';
+
+export class UpdateItemDto extends PartialType(CreateItemDto) {}
+```
+
+Para visualizar nossa documentação feita pelo swagger devemos inicializar a aplicação com
+
+```
+$ npm run start:dev
+```
+
+e em nosso navegador acessamos pelo endereço: [http://localhost:3000/api](http://localhost:3000/api). Para saber mais como utilizar a documentação e testar nossas requisições podemos consultar a documentação do próprio [modulo Swagger dentro do NestJs](https://docs.nestjs.com/openapi/introduction)
+
 ## Referencias e Agradecimentos
 
-O projeto foi montado seguindo as documentações oficiais e os tutoriais de:
+O projeto de estudo foi montado seguindo as documentações oficiais e tutoriais a baixo. Este é apenas um ponto de partida pequeno dentro do NestJs, nele podemos ver quão simples e facil é a criação de apis com boas praticas de escrita, organização e agilidade de processo com ajuda da [NestCLI](https://docs.nestjs.com/cli/overview).
 
-[Data Transfer Object](https://martinfowler.com/eaaCatalog/dataTransferObject.html)
-[SideChannel](https://www.sidechannel.blog/en/creating-an-api-with-nestjs/)
-[jtemporal](https://jtemporal.com/brincando-com-postgresql/)
-[Postgres + Docker Compose](https://www.linkedin.com/pulse/rodando-postgres-sql-em-um-container-docker-ruben-lins-silva/?trk=pulse-article_more-articles_related-content-card&originalSubdomain=pt)
+- [Data Transfer Object](https://martinfowler.com/eaaCatalog/dataTransferObject.html)
+- [Creating an API with NestJS - SideChannel](https://www.sidechannel.blog/en/creating-an-api-with-nestjs/)
+- [Brincando com o PostgreSQL - jtemporal](https://jtemporal.com/brincando-com-postgresql/)
+- [Postgres + Docker Compose](https://www.linkedin.com/pulse/rodando-postgres-sql-em-um-container-docker-ruben-lins-silva/?trk=pulse-article_more-articles_related-content-card&originalSubdomain=pt)
+- [Swager](https://docs.nestjs.com/openapi/introduction)
