@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
 
 export class CreateItemDto {
-  @ApiProperty({ example: 'Bananas' })
+  @ApiProperty({ example: '123' })
   @IsString()
   @IsNotEmpty()
   name: string;

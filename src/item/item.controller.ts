@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+
 import { ItemService } from './item.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
@@ -16,6 +18,11 @@ export class ItemController {
   constructor(private readonly itemService: ItemService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Adicionar novo item' })
+  @ApiResponse({
+    status: 201,
+    description: 'Item criado com sucesso',
+  })
   create(@Body() createItemDto: CreateItemDto) {
     return this.itemService.create(createItemDto);
   }
@@ -26,17 +33,17 @@ export class ItemController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: number) {
     return this.itemService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateItemDto: UpdateItemDto) {
-    return this.itemService.update(id, updateItemDto);
+  update(@Param('id') id: number, @Body() updateItemDto: UpdateItemDto) {
+    return this.itemService.update(+id, updateItemDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.itemService.remove(id);
+  remove(@Param('id') id: number) {
+    return this.itemService.remove(+id);
   }
 }

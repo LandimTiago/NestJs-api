@@ -410,6 +410,44 @@ $ npm run start:dev
 
 e em nosso navegador acessamos pelo endereço: [http://localhost:3000/api](http://localhost:3000/api). Para saber mais como utilizar a documentação e testar nossas requisições podemos consultar a documentação do próprio [modulo Swagger dentro do NestJs](https://docs.nestjs.com/openapi/introduction)
 
+## Testes Unitários
+
+Os testes unitários é uma fase muito importante do desenvolvimento da nossa aplicação, ela vai garantir a qualidade e a entrega de valores como esperados em tempo de desenvolvimento. por padrão o NestJs tem o [Jest](https://github.com/facebook/jest) integrado ao seu codigo. Vamos instalar apenas o modulo de testes do próprio NestJs.
+
+```bash
+$ npm i --save-dev @nestjs/testing
+```
+
+Antes de começarmos nossos testes vamos fazer algumas alterações em nossa entidade. Dentro do nosso aquivo **item.entity.ts** vamos declarar um constrututor:
+
+```ts
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+
+@Entity()
+export class Item extends BaseEntity {
+  // ...RESTANTE DO CODIGO FEITO ANTERIORMENTE
+
+  constructor(item?: Partial<Item>) {
+    super();
+    this.id = item?.id;
+    this.updated_at = item?.updated_at;
+    this.name = item?.name;
+    this.description = item?.description;
+    this.quantity = item?.quantity;
+  }
+}
+```
+
+Assim como quando realizamos a declaração do nosso Dto de update, o uso do Partial<Item> transforma todas as propriedades existentes dentro do nosso Item como opcionais, evitando assim qualquer tipo de erro pela não inserção desse parâmetro. Esse construtor servirá para quando realizarmos nossos testes eles devolvam aquilo que precisamos.
+
+O teste unitário tem por objetivo testar apenas a nossa implementação
+
 ## Referencias e Agradecimentos
 
 O projeto de estudo foi montado seguindo as documentações oficiais e tutoriais a baixo. Este é apenas um ponto de partida pequeno dentro do NestJs, nele podemos ver quão simples e facil é a criação de apis com boas praticas de escrita, organização e agilidade de processo com ajuda da [NestCLI](https://docs.nestjs.com/cli/overview).

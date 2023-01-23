@@ -8,8 +8,8 @@ import {
 
 @Entity()
 export class Item extends BaseEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
   updated_at: Date;
@@ -22,4 +22,13 @@ export class Item extends BaseEntity {
 
   @Column({ name: 'quantity', type: 'int', default: 1 })
   quantity: number;
+
+  constructor(item?: Partial<Item>) {
+    super();
+    this.id = item?.id;
+    this.updated_at = item?.updated_at;
+    this.name = item?.name;
+    this.description = item?.description;
+    this.quantity = item?.quantity;
+  }
 }
