@@ -22,8 +22,12 @@
   
 ## Refatorando a API
 
-Agora que temos nosso modulo básico da api, nossa conexão com o banco de dados está funcionando, nosso container ok, vamos refatorar a nossa api adequando a alguns padrões de arquiteturas mais comuns a serem utilizadas.
+Agora que ja configuramos toda nossa base para a api de items vamos começar a implementar algumas melhorias no quesito de arquitetura.
 
-Primeiramente, dentro da nossa pasta src vamos criar subpastas para separar as funções dos nosso aquivos. Vamos dividir as funções entre infraestrutura e api. Dentro da pasta de **infra** por enquanto vamos configurar os arquivos de conexão com banco de dados, já na pasta **api** vamos centralizar todos os arquivos que farão parte das nossas rotas.
+Primeiramente vamos começar separando as funções de endpoints e controladores das nossas entidades e arquivos de configurações do sistema.
+
+Dentro de nossa pasta src vamos criar outras duas chamadas **api** e **infra**. Em nossa pasta API vamos centralizar todos os arquivos que realizam funções de controladores, services e também seus respectivos modulos para realizar os imports, nela também vamos ter uma divisão entre v1, v2 e etc para em nossas implementações futuras termos consciencia de onde partimos e onde estamos chegando na evolução dos nossos e endpoints.
+
+Já em nossa pasta Infra vamos colocar tudo aqui que for referente a coneção com banco de dados, arquivos de entidades, arquivos de conexão com outros serviços e coisas do tipo.
 
 ## Referências
