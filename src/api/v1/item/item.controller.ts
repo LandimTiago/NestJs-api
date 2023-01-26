@@ -12,6 +12,7 @@ import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ItemService } from './item.service';
 import { CreateItemDto } from './infra/request/create-item.dto';
 import { UpdateItemDto } from './infra/request/update-item.dto';
+import { ItemResponseDto } from './infra/response/response-item.dto';
 
 @Controller()
 export class ItemController {
@@ -23,27 +24,30 @@ export class ItemController {
     status: 201,
     description: 'Item criado com sucesso',
   })
-  create(@Body() createItemDto: CreateItemDto) {
-    return this.itemService.create(createItemDto);
+  async create(@Body() createItemDto: CreateItemDto): Promise<ItemResponseDto> {
+    return await this.itemService.create(createItemDto);
   }
 
   @Get()
-  findAll() {
-    return this.itemService.findAll();
+  async findAll(): Promise<ItemResponseDto[]> {
+    return await this.itemService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.itemService.findOne(id);
+  async findOne(@Param('id') id: number): Promise<ItemResponseDto> {
+    return await this.itemService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: number, @Body() updateItemDto: UpdateItemDto) {
-    return this.itemService.update(+id, updateItemDto);
+  async update(
+    @Param('id') id: number,
+    @Body() updateItemDto: UpdateItemDto,
+  ): Promise<ItemResponseDto> {
+    return await this.itemService.update(+id, updateItemDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.itemService.remove(+id);
+  async remove(@Param('id') id: number) {
+    return await this.itemService.remove(+id);
   }
 }
