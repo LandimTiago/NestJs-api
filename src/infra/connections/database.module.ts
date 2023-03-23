@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import path from 'path';
 import { Item } from '../database/entity/item.entity';
 import { User } from '../database/entity/user.entity';
 

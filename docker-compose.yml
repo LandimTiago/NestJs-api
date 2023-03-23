@@ -1,0 +1,43 @@
+version: "3.9"
+services:
+  app:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    ports: 
+      - 3000:3000
+      - 9229:9229
+    expose: 
+      - 3000
+      - 9229
+    networks:
+      - nest-js-network
+    tty: true
+  db:
+    container_name: db
+    image: postgres:14.7
+    networks:
+      - nest-js-network
+    tty: true
+    environment:
+      - POSTGRES_DB=nest-js
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+    volumes:
+      - ./database:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    expose:
+      - 5432
+networks:
+  nest-js-network:
+    driver: bridge
+volumes:
+  database:
+    external: true
