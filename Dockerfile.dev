@@ -1,0 +1,17 @@
+FROM node:14.15.2-alpine
+
+# # Installs latest Chromium (81) package.
+# RUN apk add --no-cache \
+#   chromium=81.0.4044.113-r0 \
+#   nss \
+#   freetype \
+#   harfbuzz \
+#   ca-certificates \
+#   udev \
+#   ttf-freefont
+
+# # # Tell Puppeteer to skip installing Chrome. We'll be using the installed package.
+# ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+#   PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
+
+WORKDIR /app
